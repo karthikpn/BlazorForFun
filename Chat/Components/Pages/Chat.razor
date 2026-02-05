@@ -1,0 +1,15 @@
+﻿@page "/chat"
+@namespace Chat.Components.Pages
+@using Microsoft.AspNetCore.Authorization
+<h3>Chat</h3>
+
+<input placeholder="User" @bind="user" />
+<input placeholder="Message" @bind="message" />
+<button type="button" @onclick="Send">Send</button>
+
+<ul>
+    @foreach (var msg in messages)
+    {
+        <li>@msg</li>
+    }
+</ul>
