@@ -51,7 +51,7 @@ public partial class Chat : ComponentBase, IAsyncDisposable
     {
         if (hub is not null)
         {
-            await hub.SendAsync("SendMessage", message);
+            await hub.SendAsync("SendMessage", user, message);
             message = "";
         }
     }
