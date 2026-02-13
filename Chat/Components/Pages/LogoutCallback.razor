@@ -13,13 +13,13 @@
 </div>
 
 @code {
-    protected override void OnInitialized()
+    protected override async Task OnAfterRenderAsync(bool firstRender)
     {
-        Task.Run(async () =>
+        if (firstRender)
         {
             await Task.Delay(1000);
-            Navigation.NavigateTo("/account/oidc-logout", forceLoad: true);
-        });
+            await InvokeAsync(() => Navigation.NavigateTo("/account/oidc-logout", forceLoad: true));
+        }
     }
 }
 
