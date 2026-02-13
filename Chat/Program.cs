@@ -1,8 +1,10 @@
 using Chat.Components;
 using Chat.Components.Hubs;
+using Microsoft.AspNetCore.Authentication;
 using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.AspNetCore.Authentication.OpenIdConnect;
+using Microsoft.IdentityModel.Protocols.OpenIdConnect;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
 
@@ -33,7 +35,7 @@ public class Program
                  options.ClientId = auth0["ClientId"];
                  options.ClientSecret = auth0["ClientSecret"];
                  options.ResponseType = "code";
-                 options.CallbackPath = "/callback";
+                 options.CallbackPath = "/account/callback";
 
                  options.Scope.Clear();
                  options.Scope.Add("openid");
@@ -44,6 +46,24 @@ public class Program
 
                  options.Events = new OpenIdConnectEvents
                  {
+                     OnRemoteFailure = context =>
+                     {
+                         // Handle authentication failures (e.g., user cancelled login)
+                         var errorMessage = context.Failure?.Message ?? "";
+                         
+                         // Check if user denied authorization
+                         if (errorMessage.Contains("access_denied"))
+                         {
+                             context.HandleResponse();
+                             context.Response.Redirect("/");
+                             return Task.CompletedTask;
+                         }
+
+                         // For other failures, redirect to home with error info
+                         context.HandleResponse();
+                         context.Response.Redirect("/?error=auth_failed");
+                         return Task.CompletedTask;
+                     },
                      OnRedirectToIdentityProviderForSignOut = context =>
                      {
                          var logoutUri = $"https://{auth0["Domain"]}/v2/logout?client_id={auth0["ClientId"]}";
@@ -51,6 +71,10 @@ public class Program
                          var postLogoutUri = context.Properties.RedirectUri;
                          if (!string.IsNullOrEmpty(postLogoutUri))
                          {
+                             if (postLogoutUri.StartsWith("/"))
+                             {
+                                 postLogoutUri = $"{context.Request.Scheme}://{context.Request.Host}{postLogoutUri}";
+                             }
                              logoutUri += $"&returnTo={Uri.EscapeDataString(postLogoutUri)}";
                          }
 
