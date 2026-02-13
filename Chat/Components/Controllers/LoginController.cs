@@ -21,7 +21,7 @@ namespace Chat.Components.Controllers
         {
             var authProperties = new AuthenticationProperties
             {
-                RedirectUri = Url.Action("", "/", null, Request.Scheme)
+                RedirectUri = Url.Content("~/")
             };
 
             await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
