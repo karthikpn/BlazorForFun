@@ -1,0 +1,64 @@
+@page "/logout-callback"
+@using Microsoft.AspNetCore.Components
+@inject NavigationManager Navigation
+
+<PageTitle>Logging out</PageTitle>
+
+<div class="logout-container">
+    <div class="logout-content">
+        <div class="spinner"></div>
+        <h2>Logging you out...</h2>
+        <p>Please wait while we complete the logout process.</p>
+    </div>
+</div>
+
+@code {
+    protected override async Task OnAfterRenderAsync(bool firstRender)
+    {
+        if (firstRender)
+        {
+            await Task.Delay(1000);
+            await InvokeAsync(() => Navigation.NavigateTo("/account/oidc-logout", forceLoad: true));
+        }
+    }
+}
+
+<style>
+    .logout-container {
+        display: flex;
+        justify-content: center;
+        align-items: center;
+        min-height: 80vh;
+        padding: 2rem;
+    }
+
+    .logout-content {
+        text-align: center;
+        max-width: 400px;
+    }
+
+    .spinner {
+        border: 4px solid #f3f3f3;
+        border-top: 4px solid #667eea;
+        border-radius: 50%;
+        width: 50px;
+        height: 50px;
+        animation: spin 1s linear infinite;
+        margin: 0 auto 2rem;
+    }
+
+    @@keyframes spin {
+        0% { transform: rotate(0deg); }
+        100% { transform: rotate(360deg); }
+    }
+
+    .logout-content h2 {
+        color: #333;
+        margin-bottom: 1rem;
+    }
+
+    .logout-content p {
+        color: #666;
+        font-size: 1rem;
+    }
+</style>

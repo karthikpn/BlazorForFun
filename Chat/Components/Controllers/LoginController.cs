@@ -1,4 +1,5 @@
 ﻿using Microsoft.AspNetCore.Authentication;
+using Microsoft.AspNetCore.Authentication.Cookies;
 using Microsoft.AspNetCore.Mvc;
 
 namespace Chat.Components.Controllers
@@ -15,14 +16,25 @@ namespace Chat.Components.Controllers
             }, "Auth0");
         }
 
-        [HttpGet("logout")]
-        public async Task Logout()
+        [HttpGet("oidc-logout")]
+        public async Task<IActionResult> Logout()
         {
-            await HttpContext.SignOutAsync("Cookies");
-            await HttpContext.SignOutAsync("Auth0", new AuthenticationProperties
+            var authProperties = new AuthenticationProperties
             {
                 RedirectUri = Url.Content("~/")
-            });
+            };
+
+            await HttpContext.SignOutAsync(CookieAuthenticationDefaults.AuthenticationScheme);
+            await HttpContext.SignOutAsync("Auth0", authProperties);
+
+            return new EmptyResult();
+        }
+
+        [HttpGet("logout")]
+        public IActionResult LogoutCallback()
+        {
+            return Redirect("/logout-callback");
         }
     }
 }
+
